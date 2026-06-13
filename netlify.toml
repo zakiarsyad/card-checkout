@@ -10,9 +10,10 @@
   node_bundler = "esbuild"
 
 [dev]
-  command = "astro dev"
+  # Pinned port so we never collide with another local Astro project on 4321.
+  command = "astro dev --port 4327"
   framework = "#custom"
-  targetPort = 4321
+  targetPort = 4327
   port = 8888
 
 # The Stripe webhook needs the raw request body to verify the signature,
