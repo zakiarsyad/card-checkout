@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.netlify/
+
+# secrets — never commit. Only .env.example ships.
+.env
+.env.*
+!.env.example
+
+# astro
+.astro/
+
+# logs
+*.log
+npm-debug.log*
+
+# os / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json

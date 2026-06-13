@@ -1,0 +1,54 @@
+---
+// Self-hosted fonts (no external request, no layout shift).
+import "@fontsource-variable/inter";
+import "@fontsource/fraunces/400.css";
+import "@fontsource/fraunces/600.css";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  /**
+   * Preconnect to Stripe only on pages that will load Stripe.js, so we don't
+   * pay the connection cost on pages that never touch it.
+   */
+  preconnectStripe?: boolean;
+}
+
+const {
+  title = "Stripe Checkout Lab",
+  description = "A minimal, production-minded Stripe checkout — one product, two ways. Built with Astro, Netlify Functions, and the Payment Element.",
+  preconnectStripe = false,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#fafaf9" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+
+    {
+      preconnectStripe && (
+        <>
+          <link rel="preconnect" href="https://js.stripe.com" />
+          <link rel="preconnect" href="https://api.stripe.com" />
+        </>
+      )
+    }
+
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

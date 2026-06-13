@@ -1,0 +1,20 @@
+# Netlify configuration.
+# `netlify dev` serves the Astro site and the functions together on :8888.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+[dev]
+  command = "astro dev"
+  framework = "#custom"
+  targetPort = 4321
+  port = 8888
+
+# The Stripe webhook needs the raw request body to verify the signature,
+# so it must not be parsed/transformed. Netlify passes the raw body by default
+# for functions; we read event.body verbatim in the handler.
