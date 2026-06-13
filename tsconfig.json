@@ -4,10 +4,6 @@
   "exclude": ["dist"],
   "compilerOptions": {
     "types": ["vitest/globals"],
-    "verbatimModuleSyntax": true,
-    "baseUrl": ".",
-    "paths": {
-      "@lib/*": ["src/lib/*"]
-    }
+    "verbatimModuleSyntax": true
   }
 }
