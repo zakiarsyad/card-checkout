@@ -1,0 +1,132 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout preconnectStripe title="Payment status — Stripe Checkout Lab">
+  <main class="page">
+    <section class="card" aria-live="polite">
+      <div class="icon" id="icon" data-tone="pending" aria-hidden="true"></div>
+      <h1 id="title">Checking your payment…</h1>
+      <p class="message" id="message">One moment while we confirm the status.</p>
+
+      <p class="note">
+        <strong>How fulfillment works:</strong> this page only reads the payment
+        status. Your purchase is fulfilled when Stripe confirms the charge via a
+        webhook — so it completes even if you close this tab.
+      </p>
+
+      <a class="btn" href="/">Back to the product</a>
+    </section>
+  </main>
+
+  <script>
+    import { renderSuccess } from "../scripts/success";
+    renderSuccess();
+  </script>
+</Layout>
+
+<style>
+  .page {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: clamp(1rem, 4vw, 2.5rem);
+  }
+  .card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-ink-200);
+    border-radius: var(--radius-lg);
+    padding: clamp(1.75rem, 5vw, 2.5rem);
+    text-align: center;
+    box-shadow:
+      0 1px 2px rgb(12 10 9 / 0.04),
+      0 12px 32px -12px rgb(12 10 9 / 0.12);
+  }
+  .icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    margin: 0 auto 1.25rem;
+    display: grid;
+    place-items: center;
+    background: var(--color-accent-soft);
+  }
+  .icon::after {
+    content: "";
+    display: block;
+  }
+  .icon[data-tone="succeeded"] {
+    background: var(--color-success-soft);
+  }
+  .icon[data-tone="succeeded"]::after {
+    width: 22px;
+    height: 12px;
+    border-left: 3px solid var(--color-success);
+    border-bottom: 3px solid var(--color-success);
+    transform: translateY(-2px) rotate(-45deg);
+  }
+  .icon[data-tone="processing"] {
+    background: var(--color-warning-soft);
+  }
+  .icon[data-tone="processing"]::after {
+    width: 18px;
+    height: 18px;
+    border: 3px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
+    border-top-color: var(--color-warning);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  .icon[data-tone="failed"] {
+    background: var(--color-danger-soft);
+  }
+  .icon[data-tone="failed"]::after {
+    content: "×";
+    color: var(--color-danger);
+    font-size: 2rem;
+    line-height: 1;
+    font-weight: 700;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-2xl);
+    margin: 0 0 0.5rem;
+  }
+  .message {
+    color: var(--color-ink-500);
+    margin: 0 0 1.5rem;
+    font-size: var(--text-sm);
+  }
+  .note {
+    text-align: left;
+    font-size: var(--text-xs);
+    color: var(--color-ink-500);
+    background: var(--color-ink-100);
+    border-radius: var(--radius-sm);
+    padding: 0.875rem;
+    margin: 0 0 1.5rem;
+    line-height: 1.5;
+  }
+  .note strong {
+    color: var(--color-ink-700);
+  }
+  .btn {
+    display: inline-block;
+    border-radius: var(--radius-md);
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    text-decoration: none;
+  }
+  .btn:hover {
+    background: var(--color-accent-strong);
+  }
+</style>
