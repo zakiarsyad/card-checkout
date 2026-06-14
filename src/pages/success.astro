@@ -10,6 +10,8 @@ import { BRAND } from "../lib/brand";
       <h1 id="title">Checking your payment…</h1>
       <p class="message" id="message">One moment while we confirm the status.</p>
 
+      <p class="subnote" id="subnote" hidden></p>
+
       <p class="note">
         <strong>How fulfillment works:</strong> this page only reads the payment
         status. Your purchase is fulfilled when Stripe confirms the charge via a
@@ -103,6 +105,16 @@ import { BRAND } from "../lib/brand";
     color: var(--color-ink-500);
     margin: 0 0 1.5rem;
     font-size: var(--text-sm);
+  }
+  .subnote {
+    margin: -0.75rem 0 1.5rem;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-success);
+    background: var(--color-success-soft);
+    border-radius: var(--radius-sm);
+    padding: 0.625rem 0.875rem;
+    font-variant-numeric: tabular-nums;
   }
   .note {
     text-align: left;

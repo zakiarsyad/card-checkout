@@ -4,7 +4,11 @@ import { getStripe } from "./_shared/stripe";
 import { json, errorResponse, methodNotAllowed, correlationId } from "./_shared/http";
 import { parseCheckoutRequest } from "./_shared/checkout";
 import { priceIdFor } from "../../src/lib/catalog";
-import { extractSubscriptionClientSecret, type SubscriptionLike } from "../../src/lib/subscription";
+import {
+  extractSubscriptionClientSecret,
+  subscriptionPeriodEnd,
+  type SubscriptionLike,
+} from "../../src/lib/subscription";
 import { createLogger } from "../../src/lib/log";
 
 /**
@@ -52,7 +56,8 @@ export default async function handler(req: Request, _context: Context): Promise<
     } as unknown as Stripe.SubscriptionCreateParams;
 
     const subscription = await stripe.subscriptions.create(params, { idempotencyKey });
-    const clientSecret = extractSubscriptionClientSecret(subscription as unknown as SubscriptionLike);
+    const sub = subscription as unknown as SubscriptionLike;
+    const clientSecret = extractSubscriptionClientSecret(sub);
 
     log.info("subscription created", { id: subscription.id, status: subscription.status });
 
@@ -62,6 +67,9 @@ export default async function handler(req: Request, _context: Context): Promise<
       currency: plan.currency,
       plan: plan.key,
       subscriptionId: subscription.id,
+      // The next charge date is already on the created object — return it so the
+      // success page can show it without a second Stripe call.
+      nextChargeAt: subscriptionPeriodEnd(sub),
     });
   } catch (err) {
     log.error("subscription failed", { message: err instanceof Error ? err.message : String(err) });

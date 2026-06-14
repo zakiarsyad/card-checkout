@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { extractSubscriptionClientSecret } from "./subscription";
+import { extractSubscriptionClientSecret, subscriptionPeriodEnd } from "./subscription";
 
 describe("extractSubscriptionClientSecret", () => {
   it("reads the modern confirmation_secret.client_secret", () => {
@@ -24,5 +24,17 @@ describe("extractSubscriptionClientSecret", () => {
   it("throws when no client secret is present", () => {
     expect(() => extractSubscriptionClientSecret({ latest_invoice: {} })).toThrow(/client secret/);
     expect(() => extractSubscriptionClientSecret({})).toThrow();
+  });
+});
+
+describe("subscriptionPeriodEnd", () => {
+  it("reads current_period_end from the subscription item (current API)", () => {
+    expect(subscriptionPeriodEnd({ items: { data: [{ current_period_end: 1234 }] } })).toBe(1234);
+  });
+  it("falls back to the subscription-level field (older API)", () => {
+    expect(subscriptionPeriodEnd({ current_period_end: 5678 })).toBe(5678);
+  });
+  it("returns null when neither is present", () => {
+    expect(subscriptionPeriodEnd({})).toBeNull();
   });
 });

@@ -35,6 +35,7 @@ export function initCheckout(): void {
   let elements: StripeElements | null = null;
   let paymentElement: StripePaymentElement | null = null;
   let idempotencyKey = "";
+  let nextChargeAt = 0; // subscription next-charge unix ts; threaded to /success
 
   const selectedPlan = (): PlanKey => {
     const checked = form.querySelector<HTMLInputElement>('input[name="plan"]:checked');
@@ -96,6 +97,7 @@ export function initCheckout(): void {
     paymentElement = null;
     elements = null;
     idempotencyKey = "";
+    nextChargeAt = 0;
     paymentSection!.hidden = true;
     clearStatus();
     clearError();
@@ -126,11 +128,13 @@ export function initCheckout(): void {
       });
       const data = (await res.json().catch(() => ({}))) as {
         clientSecret?: string;
+        nextChargeAt?: number | null;
         error?: { message?: string };
       };
       if (!res.ok || !data.clientSecret) {
         throw new Error(data.error?.message ?? "We couldn't start checkout. Please try again.");
       }
+      nextChargeAt = typeof data.nextChargeAt === "number" ? data.nextChargeAt : 0;
 
       const pk = import.meta.env.PUBLIC_STRIPE_KEY as string | undefined;
       if (!pk) throw new Error("Payments aren't configured (missing publishable key).");
@@ -180,9 +184,14 @@ export function initCheckout(): void {
     // No `redirect: 'if_required'`: let Stripe drive 3DS and redirect to the
     // return_url on success. The success page reads the final status. On a
     // decline/validation error, the promise resolves here with `error` set.
+    // Carry the next-charge date to the success page so it can show the
+    // recurring summary. Stripe appends its own params to this return_url.
+    const returnUrl = new URL("/success", window.location.origin);
+    if (nextChargeAt) returnUrl.searchParams.set("renews", String(nextChargeAt));
+
     const { error } = await stripe.confirmPayment({
       elements,
-      confirmParams: { return_url: `${window.location.origin}/success` },
+      confirmParams: { return_url: returnUrl.toString() },
     });
 
     // We only get here on an immediate error (no redirect happened).

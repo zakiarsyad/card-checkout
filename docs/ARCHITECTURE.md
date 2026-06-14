@@ -57,7 +57,8 @@ src/
     errors.ts             Stripe errors → user-facing taxonomy (declined/network/…)
     subscription.ts       extract the first-invoice client secret from a subscription
     idempotency.ts        replay-safe "process this event id exactly once"
-    webhook-events.ts     which events we handle and what each means (grant/revoke/…)
+    webhook-events.ts     event routing: one-time fulfills on payment_intent.succeeded,
+                          subscriptions on invoice.* (so the first charge isn't granted twice)
     log.ts                structured logger that redacts secrets
     *.test.ts             every module is unit-tested right beside it
   components/           ← UI in components (markup + scoped CSS, co-located)
@@ -68,7 +69,8 @@ src/
     TrustNote.astro       the "Secured by Stripe" reassurance
   pages/                ← thin composition (Astro)
     index.astro           lays out the two columns from the components above
-    success.astro         post-payment status page (reads, never fulfills)
+    success.astro         post-payment status page (reads, never fulfills); shows the
+                          recurring summary for subscriptions (next-charge date via the URL)
   scripts/              ← browser controllers (vanilla TS, no framework)
     checkout.ts           the payment island: loads Stripe.js, confirms payment
     test-cards.ts         click-to-copy for the test-card chips

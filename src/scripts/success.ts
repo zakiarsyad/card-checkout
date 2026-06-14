@@ -43,6 +43,11 @@ export async function renderSuccess(): Promise<void> {
     const ui = statusToUiState(paymentIntent.status as PaymentIntentStatus);
     const copy = STATE_COPY[ui];
     render(TONE[ui] ?? "pending", copy.title || "Payment status", copy.message);
+
+    // If this was a subscription, surface the recurring summary.
+    if (ui === "succeeded" || ui === "processing") {
+      renderSubscription(params.get("renews"));
+    }
   } catch {
     render(
       "processing",
@@ -50,4 +55,24 @@ export async function renderSuccess(): Promise<void> {
       "Your payment may still be processing. If you completed checkout, you'll be confirmed via email.",
     );
   }
+}
+
+/**
+ * Show "Subscription active — renews monthly · next charge …". The next-charge
+ * date is passed in the URL (`renews`, a Unix timestamp) by the checkout — the
+ * subscription's first charge succeeded to reach this page, so no extra Stripe
+ * call is needed. Present only for the subscription plan.
+ */
+function renderSubscription(renews: string | null): void {
+  const el = document.getElementById("subnote");
+  if (!el || !renews) return;
+
+  let line = "✓ Subscription active — renews monthly";
+  const ts = Number(renews);
+  if (Number.isFinite(ts) && ts > 0) {
+    const date = new Date(ts * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    line += ` · next charge ${date}`;
+  }
+  el.textContent = line;
+  el.hidden = false;
 }

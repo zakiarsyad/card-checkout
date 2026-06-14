@@ -21,6 +21,7 @@ beforeEach(() => {
     id: "sub_123",
     status: "incomplete",
     latest_invoice: { confirmation_secret: { client_secret: "pi_sub_secret_abc" } },
+    items: { data: [{ current_period_end: 1783996323 }] },
   });
   (getStripe as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
     customers: { create: customersCreate },
@@ -44,6 +45,7 @@ describe("create-subscription handler", () => {
       currency: "usd",
       plan: "subscription",
       subscriptionId: "sub_123",
+      nextChargeAt: 1783996323,
     });
     expect(subscriptionsCreate).toHaveBeenCalledWith(
       expect.objectContaining({ customer: "cus_123", items: [{ price: "price_sub_123" }], payment_behavior: "default_incomplete" }),

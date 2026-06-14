@@ -15,6 +15,11 @@
 // Minimal structural type — we only touch the fields we need.
 export interface SubscriptionLike {
   id?: string;
+  status?: string;
+  // Current API exposes the period on subscription items; older API had it
+  // on the subscription itself. We read items first, then fall back.
+  current_period_end?: number | null;
+  items?: { data?: Array<{ current_period_end?: number | null }> };
   latest_invoice?:
     | string
     | null
@@ -44,4 +49,16 @@ export function extractSubscriptionClientSecret(sub: SubscriptionLike): string {
   if (pi && typeof pi === "object" && pi.client_secret) return pi.client_secret;
 
   throw new Error("No client secret on the subscription's first invoice");
+}
+
+/**
+ * The end of the current billing period (Unix seconds) = the next charge date.
+ * Reads the subscription item first (current API), falling back to the
+ * subscription-level field (older API). Returns null if neither is present.
+ */
+export function subscriptionPeriodEnd(sub: SubscriptionLike): number | null {
+  const fromItem = sub.items?.data?.[0]?.current_period_end;
+  if (typeof fromItem === "number") return fromItem;
+  if (typeof sub.current_period_end === "number") return sub.current_period_end;
+  return null;
 }

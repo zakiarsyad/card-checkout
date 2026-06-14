@@ -50,13 +50,21 @@ export function decideFulfillment(event: EventLike): FulfillmentAction | null {
   const ref = typeof obj.id === "string" ? obj.id : "unknown";
 
   switch (event.type) {
+    // A subscription's first charge fires payment_intent.* AND invoice.*. To
+    // avoid double-fulfillment, subscriptions are owned by the invoice events;
+    // here we act only on one-time payments (tagged metadata.plan=one_time).
     case "payment_intent.succeeded":
-      return { effect: "grant", description: "Grant access for completed payment", ref };
+      return isOneTimePayment(obj)
+        ? { effect: "grant", description: "Grant access for completed one-time payment", ref }
+        : { effect: "noop", description: "Subscription charge — fulfilled via invoice.paid", ref };
+    case "payment_intent.payment_failed":
+      return isOneTimePayment(obj)
+        ? { effect: "notify_failure", description: "Flag failed one-time payment", ref }
+        : { effect: "noop", description: "Subscription charge failed — handled via invoice.payment_failed", ref };
     case "invoice.paid":
       return { effect: "grant", description: "Grant/renew access for paid invoice", ref };
-    case "payment_intent.payment_failed":
     case "invoice.payment_failed":
-      return { effect: "notify_failure", description: "Flag failed payment (dunning candidate)", ref };
+      return { effect: "notify_failure", description: "Flag failed invoice (dunning candidate)", ref };
     case "customer.subscription.deleted":
       return { effect: "revoke", description: "Revoke access for canceled subscription", ref };
     case "customer.subscription.created":
@@ -73,4 +81,10 @@ export function decideFulfillment(event: EventLike): FulfillmentAction | null {
     default:
       return null;
   }
+}
+
+/** One-time PaymentIntents are tagged with metadata.plan = "one_time". */
+function isOneTimePayment(obj: Record<string, unknown>): boolean {
+  const meta = obj.metadata;
+  return typeof meta === "object" && meta !== null && (meta as Record<string, unknown>).plan === "one_time";
 }
