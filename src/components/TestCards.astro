@@ -1,0 +1,97 @@
+---
+// The "how to run the demo" aside — click-to-copy test cards. Secondary to the
+// pitch above it, so it's set in a muted panel.
+const testCards = [
+  { label: "Succeeds", number: "4242424242424242" },
+  { label: "3-D Secure", number: "4000002500003155" },
+  { label: "Declined", number: "4000000000000002" },
+];
+const spaced = (n: string) => n.replace(/(.{4})/g, "$1 ").trim();
+---
+
+<div class="try">
+  <p class="try__label">Try the demo — tap a test card to copy, then paste in:</p>
+  <div class="try__chips">
+    {
+      testCards.map((c) => (
+        <button type="button" class="chip" data-card={c.number}>
+          <span class="chip__name">{c.label}</span>
+          <span class="chip__num">{spaced(c.number)}</span>
+        </button>
+      ))
+    }
+  </div>
+  <p class="try__why">
+    Any future expiry &amp; CVC. Can't autofill it for you — the card field is a
+    sandboxed Stripe iframe, off-limits to page JS (the PCI boundary that keeps
+    card data off our servers).
+  </p>
+</div>
+
+<script>
+  import { initTestCards } from "../scripts/test-cards";
+  initTestCards();
+</script>
+
+<style>
+  .try {
+    margin: 0;
+    max-width: 30rem;
+    padding: 1rem 1.1rem;
+    background: var(--color-ink-100);
+    border-radius: var(--radius-md);
+  }
+  .try__label {
+    margin: 0 0 0.625rem;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-ink-700);
+    line-height: 1.4;
+  }
+  .try__chips {
+    display: grid;
+    gap: 0.4rem;
+  }
+  .chip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-ink-200);
+    border-radius: var(--radius-sm);
+    background: var(--color-paper);
+    font: inherit;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+  .chip:hover {
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+  }
+  .chip__name {
+    font-weight: 600;
+    font-size: var(--text-xs);
+    color: var(--color-ink-900);
+  }
+  .chip[data-copied="true"] .chip__name {
+    color: var(--color-success);
+  }
+  .chip__num {
+    font-size: var(--text-xs);
+    color: var(--color-ink-500);
+    font-variant-numeric: tabular-nums;
+  }
+  /* A subordinate footnote — lighter than the label, but ink-600 (not 500) so
+     it stays AA on the panel's tinted background. */
+  .try__why {
+    margin: 0.75rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--color-ink-600);
+  }
+</style>

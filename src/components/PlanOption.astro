@@ -1,0 +1,85 @@
+---
+import type { Plan } from "../lib/catalog";
+import { formatAmount } from "../lib/money";
+
+interface Props {
+  plan: Plan;
+  checked?: boolean;
+}
+
+const { plan, checked = false } = Astro.props;
+const per = plan.interval === "year" ? "/yr" : "/mo";
+---
+
+<label class="plan">
+  <input type="radio" name="plan" value={plan.key} checked={checked} />
+  <span class="plan__body">
+    <span class="plan__name">{plan.name}</span>
+    <span class="plan__note">{plan.note}</span>
+  </span>
+  <span class="plan__price">
+    {formatAmount(plan.amount, plan.currency)}{
+      plan.interval && <span class="plan__per">{per}</span>
+    }
+  </span>
+</label>
+
+<style>
+  .plan {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border: 1.5px solid var(--color-ink-200);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .plan:hover {
+    border-color: var(--color-accent);
+  }
+  .plan:has(input:checked) {
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+    box-shadow: 0 0 0 1px var(--color-accent);
+  }
+  .plan:has(input:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .plan input {
+    accent-color: var(--color-accent);
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+  }
+  .plan__body {
+    display: grid;
+    gap: 0.1rem;
+  }
+  .plan__name {
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--color-ink-900);
+  }
+  .plan__note {
+    font-size: var(--text-xs);
+    line-height: 1.35;
+    /* ink-600 (not 500) so it stays AA on the selected plan's tinted background. */
+    color: var(--color-ink-600);
+  }
+  .plan__price {
+    font-weight: 650;
+    color: var(--color-ink-900);
+    font-variant-numeric: tabular-nums;
+  }
+  .plan__per {
+    color: var(--color-ink-500);
+    font-weight: 400;
+    font-size: var(--text-xs);
+  }
+</style>

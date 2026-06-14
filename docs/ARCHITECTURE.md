@@ -60,13 +60,20 @@ src/
     webhook-events.ts     which events we handle and what each means (grant/revoke/…)
     log.ts                structured logger that redacts secrets
     *.test.ts             every module is unit-tested right beside it
-  pages/                ← static HTML (Astro)
-    index.astro           product page + plan toggle (the only marketing copy)
+  components/           ← UI in components (markup + scoped CSS, co-located)
+    DemoIntro.astro       the pitch: headline, sub, "what it demonstrates" list
+    TestCards.astro       muted "run the demo" panel + click-to-copy chips
+    PlanOption.astro      one reusable plan row (rendered twice)
+    Checkout.astro        the card: header, plans, total, states, button
+    TrustNote.astro       the "Secured by Stripe" reassurance
+  pages/                ← thin composition (Astro)
+    index.astro           lays out the two columns from the components above
     success.astro         post-payment status page (reads, never fulfills)
   scripts/              ← browser controllers (vanilla TS, no framework)
-    checkout.ts           the interactive island: loads Stripe.js, confirms payment
+    checkout.ts           the payment island: loads Stripe.js, confirms payment
+    test-cards.ts         click-to-copy for the test-card chips
     success.ts            reads PaymentIntent status for display
-  layouts/Layout.astro   <head>, fonts, preconnect
+  layouts/Layout.astro   <head>, fonts, preconnect, SEO meta + JSON-LD
   styles/global.css      design tokens (Tailwind v4 @theme) + base styles
 
 netlify/functions/      ← serverless endpoints (thin shells over src/lib)
@@ -89,7 +96,9 @@ docs/                   ← read these to understand the "why" (start with READM
 | Change a user-facing error message | `src/lib/errors.ts` |
 | Change what a payment status shows | `src/lib/payment-state.ts` (`STATE_COPY`) |
 | Handle a new webhook event | `src/lib/webhook-events.ts` |
-| Change the checkout UI / layout | `src/pages/index.astro` + `src/styles/global.css` |
+| Change the checkout card UI | `src/components/Checkout.astro` (+ `PlanOption.astro`) |
+| Change the left-column pitch / test cards | `src/components/DemoIntro.astro` / `TestCards.astro` |
+| Change the page layout (two columns) | `src/pages/index.astro` |
 | Change the confirm/3DS flow | `src/scripts/checkout.ts` |
 | Change colors / type / spacing | `@theme` block in `src/styles/global.css` |
 
@@ -100,11 +109,16 @@ docs/                   ← read these to understand the "why" (start with READM
 - **Money is integer minor units.** Never floats. Use `src/lib/money.ts`.
 - **Secrets only in `.env`** (gitignored). `.env.example` is the committed
   template. Never log secrets — `log.ts` redacts them defensively.
-- **No UI framework.** The checkout is a vanilla-TS Astro island, *not* a React
-  component, to keep first-load JS tiny (Payment Element loads from Stripe's CDN
-  only when the user intends to pay). This is a deliberate deviation from the
-  `CheckoutForm.tsx` sketch in `CLAUDE.md`, made to meet the performance budget
-  in [`STANDARDS.md`](STANDARDS.md).
+- **No UI framework.** The checkout is a vanilla-TS Astro island
+  (`src/scripts/checkout.ts`), *not* a React component, to keep first-load JS
+  tiny — the Payment Element loads from Stripe's CDN only when the user intends
+  to pay. (An earlier sketch imagined a React `CheckoutForm.tsx`; we went vanilla
+  to meet the performance budget in [`STANDARDS.md`](STANDARDS.md).)
+- **Stripe-aligned design.** One variable sans (Inter) everywhere; Stripe's
+  navy/slate palette with the `#635BFF` blurple. Tokens are the `@theme` block in
+  `src/styles/global.css`; rationale in
+  [`decisions/ADR-0006`](decisions/ADR-0006-visual-design-language.md). The CTA
+  copy is plan-aware so a subscription never reads as a one-time charge.
 
 ## Run it locally
 

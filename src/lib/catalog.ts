@@ -18,17 +18,15 @@ export type PlanMode = "payment" | "subscription";
 export interface Plan {
   key: PlanKey;
   mode: PlanMode;
-  /** Short label for the toggle, e.g. "One-time". */
-  label: string;
-  /** Full name, e.g. "One-time purchase". */
+  /** Name shown in the plan toggle. */
   name: string;
+  /** One-line value note shown under the name. */
+  note: string;
   /** Authoritative price in integer minor units. */
   amount: number;
   currency: string;
   /** Billing interval for subscriptions; undefined for one-time. */
   interval?: "month" | "year";
-  /** Microcopy describing what the buyer gets. */
-  blurb: string;
 }
 
 export const PRODUCT_NAME = "Pro UI Kit";
@@ -37,21 +35,19 @@ export const PLANS: Record<PlanKey, Plan> = {
   one_time: {
     key: "one_time",
     mode: "payment",
-    label: "One-time",
-    name: "One-time purchase",
+    name: "Buy once",
+    note: "This kit, yours forever.",
     amount: 4900, // $49.00
     currency: "usd",
-    blurb: "Pay once. Yours forever, including this version's updates.",
   },
   subscription: {
     key: "subscription",
     mode: "subscription",
-    label: "Subscribe",
-    name: "All-access subscription",
+    name: "Subscribe monthly",
+    note: "Every kit, plus future updates.",
     amount: 900, // $9.00 / month
     currency: "usd",
     interval: "month",
-    blurb: "Every kit, every update, billed monthly. Cancel anytime.",
   },
 };
 

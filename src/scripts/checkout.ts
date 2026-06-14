@@ -11,7 +11,7 @@ import { mapStripeError } from "../lib/errors";
 import { STATE_COPY } from "../lib/payment-state";
 import { formatAmount } from "../lib/money";
 import { PLANS, type PlanKey } from "../lib/catalog";
-import type { Stripe, StripeElements } from "@stripe/stripe-js";
+import type { Stripe, StripeElements, StripePaymentElement } from "@stripe/stripe-js";
 
 type Phase = "select" | "pay";
 
@@ -27,11 +27,13 @@ export function initCheckout(): void {
   const paymentSection = document.getElementById("payment-section");
   const statusEl = document.getElementById("status");
   const errorEl = document.getElementById("error");
+  const recurringEl = document.getElementById("recurring-note");
   if (!form || !primary || !totalEl || !paymentSection || !statusEl || !errorEl) return;
 
   let phase: Phase = "select";
   let stripe: Stripe | null = null;
   let elements: StripeElements | null = null;
+  let paymentElement: StripePaymentElement | null = null;
   let idempotencyKey = "";
 
   const selectedPlan = (): PlanKey => {
@@ -65,26 +67,46 @@ export function initCheckout(): void {
     errorEl.textContent = "";
   };
 
+  const perSuffix = (interval?: string) => (interval === "year" ? "/yr" : "/mo");
+
+  // The CTA must say exactly what it does — and never let a subscription read
+  // like a one-time charge (docs/STANDARDS.md → Design; ADR-0006).
   const payLabel = (): string => {
     const plan = PLANS[selectedPlan()];
-    return `Pay ${formatAmount(plan.amount, plan.currency)}`;
+    const amount = formatAmount(plan.amount, plan.currency);
+    return plan.interval ? `Subscribe · ${amount}${perSuffix(plan.interval)}` : `Pay ${amount}`;
   };
 
-  // Keep the signature total in sync with the toggle.
+  // Keep the live total + recurring note in sync with the toggle. The total is
+  // the amount due today; cadence lives in the recurring note (no "/mo" on a
+  // "due today" figure).
   const syncTotal = () => {
     const plan = PLANS[selectedPlan()];
     totalEl.textContent = formatAmount(plan.amount, plan.currency);
-    if (plan.interval) {
-      const per = document.createElement("span");
-      per.style.cssText = "font-size:var(--text-xl);color:var(--color-ink-500);font-weight:400;";
-      per.textContent = `/${plan.interval === "month" ? "mo" : "yr"}`;
-      totalEl.appendChild(per);
-    }
+    if (recurringEl) recurringEl.hidden = !plan.interval;
+  };
+
+  // Collapse the payment step back to plan selection. Used when the visitor
+  // changes plan after opening payment: the mounted Element belongs to the old
+  // plan's intent, so we tear it down and require a fresh "Continue" (which
+  // creates a new intent for the new plan). idempotencyKey is reset so it isn't
+  // reused across plans.
+  const resetToSelect = () => {
+    paymentElement?.destroy();
+    paymentElement = null;
+    elements = null;
+    idempotencyKey = "";
+    paymentSection!.hidden = true;
+    clearStatus();
+    clearError();
+    phase = "select";
+    setButton("Continue to payment");
   };
 
   form.querySelectorAll<HTMLInputElement>('input[name="plan"]').forEach((input) => {
     input.addEventListener("change", () => {
-      if (phase === "select") syncTotal();
+      syncTotal();
+      if (phase === "pay") resetToSelect();
     });
   });
 
@@ -122,23 +144,25 @@ export function initCheckout(): void {
         appearance: {
           theme: "stripe",
           variables: {
-            colorPrimary: "#4f46e5",
-            colorText: "#1c1917",
-            colorDanger: "#b91c1c",
+            colorPrimary: "#635bff",
+            colorText: "#0a2540",
+            colorTextSecondary: "#697386",
+            colorDanger: "#df1b41",
             fontFamily: "Inter Variable, system-ui, sans-serif",
-            borderRadius: "12px",
+            borderRadius: "10px",
             spacingUnit: "4px",
           },
         },
       });
-      const paymentElement = elements.create("payment", { layout: "tabs" });
-      paymentElement.mount("#payment-element");
+      const el = elements.create("payment", { layout: "tabs" });
+      paymentElement = el;
+      el.mount("#payment-element");
 
       paymentSection!.hidden = false;
       clearStatus();
       phase = "pay";
       setButton(payLabel());
-      paymentElement.on("ready", () => paymentElement.focus());
+      el.on("ready", () => el.focus());
     } catch (err) {
       clearStatus();
       showError("Couldn't start checkout", err instanceof Error ? err.message : "Please try again.");

@@ -1,316 +1,71 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { PLANS, PRODUCT_NAME } from "../lib/catalog";
-import { formatAmount } from "../lib/money";
-
-const oneTime = PLANS.one_time;
-const sub = PLANS.subscription;
+import { BRAND } from "../lib/brand";
+import DemoIntro from "../components/DemoIntro.astro";
+import TestCards from "../components/TestCards.astro";
+import Checkout from "../components/Checkout.astro";
 ---
 
-<Layout preconnectStripe title={`${PRODUCT_NAME} — Stripe Checkout Lab`}>
+<Layout preconnectStripe title={`${BRAND.name} — a Stripe checkout demo`}>
   <main class="page">
-    <section class="card" aria-labelledby="product-title">
-      <header class="card__head">
-        <p class="eyebrow">Digital download</p>
-        <h1 id="product-title">{PRODUCT_NAME}</h1>
-        <p class="lede">
-          A polished component kit for shipping interfaces fast. One product,
-          sold two ways — buy it once, or subscribe for everything.
-        </p>
-      </header>
-
-      <!-- Plan toggle -->
-      <fieldset class="plans">
-        <legend class="sr-only">Choose how to buy</legend>
-
-        <label class="plan" data-plan="one_time">
-          <input
-            type="radio"
-            name="plan"
-            value="one_time"
-            data-amount={oneTime.amount}
-            data-currency={oneTime.currency}
-            checked
-          />
-          <span class="plan__body">
-            <span class="plan__name">{oneTime.name}</span>
-            <span class="plan__blurb">{oneTime.blurb}</span>
-          </span>
-          <span class="plan__price">{formatAmount(oneTime.amount, oneTime.currency)}</span>
-        </label>
-
-        <label class="plan" data-plan="subscription">
-          <input
-            type="radio"
-            name="plan"
-            value="subscription"
-            data-amount={sub.amount}
-            data-currency={sub.currency}
-          />
-          <span class="plan__body">
-            <span class="plan__name">{sub.name}</span>
-            <span class="plan__blurb">{sub.blurb}</span>
-          </span>
-          <span class="plan__price">
-            {formatAmount(sub.amount, sub.currency)}<span class="plan__per">/mo</span>
-          </span>
-        </label>
-      </fieldset>
-
-      <!-- The signature moment: the live total. -->
-      <div class="total">
-        <span class="total__label">You pay</span>
-        <span class="total__amount" id="total-amount" data-suffix="">
-          {formatAmount(oneTime.amount, oneTime.currency)}
-        </span>
-      </div>
-
-      <!-- Payment Element mounts here once the user continues. -->
-      <div id="payment-section" hidden>
-        <div id="payment-element" aria-label="Payment details"></div>
-      </div>
-
-      <!-- Status + error live regions. -->
-      <p id="status" class="status" role="status" aria-live="polite" hidden></p>
-      <p id="error" class="error" role="alert" aria-live="assertive" hidden></p>
-
-      <button id="primary" class="btn" type="button" data-phase="select">
-        Continue to payment
-      </button>
-
-      <p class="trust">
-        <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="11" width="18" height="11" rx="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-        Secured by Stripe · test mode — no real charges
-      </p>
+    <!-- Left: what it is + how to run it -->
+    <section class="info" aria-labelledby="demo-title">
+      <DemoIntro />
+      <TestCards />
     </section>
-
-    <p class="footnote">
-      A portfolio demo. Source &amp; design notes in the
-      <a class="ulink" href="https://github.com/zakiarsyad" rel="noopener">repository</a>.
-    </p>
+    
+    <!-- Right: the live checkout -->
+    <section class="checkout" aria-label="Checkout">
+      <Checkout />
+      <a class="readmore" href={`${BRAND.repo}/tree/main/docs`} rel="noopener">
+        Source &amp; architecture →
+      </a>
+    </section>
   </main>
-
-  <script>
-    import { initCheckout } from "../scripts/checkout";
-    initCheckout();
-  </script>
 </Layout>
 
 <style>
   .page {
     min-height: 100dvh;
+    max-width: 900px;
+    margin-inline: auto;
+    padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2rem);
     display: grid;
-    place-items: center;
-    padding: clamp(1rem, 4vw, 2.5rem);
-    gap: 1.25rem;
-    align-content: center;
+    gap: clamp(1.75rem, 4vw, 3rem);
   }
-  .card {
-    width: 100%;
-    max-width: 460px;
-    background: var(--color-paper);
-    border: 1px solid var(--color-ink-200);
-    border-radius: var(--radius-lg);
-    padding: clamp(1.5rem, 4vw, 2.25rem);
-    box-shadow:
-      0 1px 2px rgb(12 10 9 / 0.04),
-      0 12px 32px -12px rgb(12 10 9 / 0.12);
-  }
-  .eyebrow {
-    margin: 0 0 0.5rem;
-    font-size: var(--text-xs);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-accent-strong);
-    font-weight: 600;
-  }
-  h1 {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: var(--text-3xl);
-    margin: 0 0 0.5rem;
-  }
-  .lede {
-    margin: 0 0 1.5rem;
-    color: var(--color-ink-500);
-    font-size: var(--text-sm);
-  }
-  .plans {
-    border: 0;
-    margin: 0 0 1.25rem;
-    padding: 0;
-    display: grid;
-    gap: 0.625rem;
-  }
-  .plan {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 0.875rem;
-    padding: 0.875rem 1rem;
-    border: 1.5px solid var(--color-ink-200);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
-  }
-  .plan:hover {
-    border-color: var(--color-ink-400);
-  }
-  .plan:has(input:checked) {
-    border-color: var(--color-accent);
-    background: var(--color-accent-soft);
-  }
-  .plan:has(input:focus-visible) {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-  .plan input {
-    accent-color: var(--color-accent);
-    width: 1.05rem;
-    height: 1.05rem;
-    margin: 0;
-  }
-  .plan__body {
-    display: grid;
-    gap: 0.1rem;
-  }
-  .plan__name {
-    font-weight: 600;
-    font-size: var(--text-sm);
-  }
-  .plan__blurb {
-    font-size: var(--text-xs);
-    color: var(--color-ink-500);
-  }
-  .plan__price {
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-  .plan__per {
-    color: var(--color-ink-500);
-    font-weight: 400;
-    font-size: var(--text-xs);
-  }
-  .total {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding: 1rem 0 1.25rem;
-    border-top: 1px solid var(--color-ink-200);
-    margin-top: 0.25rem;
-  }
-  .total__label {
-    color: var(--color-ink-500);
-    font-size: var(--text-sm);
-  }
-  .total__amount {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 600;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.03em;
-  }
-  #payment-section {
-    margin-bottom: 1rem;
-  }
-  .status,
-  .error {
-    font-size: var(--text-sm);
-    border-radius: var(--radius-sm);
-    padding: 0.75rem 0.875rem;
-    margin: 0 0 1rem;
-  }
-  .status {
-    background: var(--color-accent-soft);
-    color: var(--color-accent-strong);
-  }
-  .status[data-tone="processing"] {
-    background: var(--color-warning-soft);
-    color: var(--color-warning);
-  }
-  .status[data-tone="succeeded"] {
-    background: var(--color-success-soft);
-    color: var(--color-success);
-  }
-  .error {
-    background: var(--color-danger-soft);
-    color: var(--color-danger);
-  }
-  .error strong {
-    display: block;
-    margin-bottom: 0.15rem;
-  }
-  .btn {
-    width: 100%;
-    border: 0;
-    border-radius: var(--radius-md);
-    background: var(--color-accent);
-    color: #fff;
-    font: inherit;
-    font-weight: 600;
-    font-size: var(--text-base);
-    padding: 0.875rem 1rem;
-    cursor: pointer;
-    transition: background 0.15s ease, transform 0.05s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    min-height: 3rem;
-  }
-  .btn:hover:not(:disabled) {
-    background: var(--color-accent-strong);
-  }
-  .btn:active:not(:disabled) {
-    transform: translateY(1px);
-  }
-  .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  .btn[data-busy="true"] .btn__spinner {
-    display: inline-block;
-  }
-  .btn__spinner {
-    display: none;
-    width: 1rem;
-    height: 1rem;
-    border: 2px solid rgb(255 255 255 / 0.4);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-  }
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
+  /* Top-aligned so the card grows downward when the Payment Element expands,
+     instead of re-centering and pushing the plans/total up. */
+  @media (min-width: 860px) {
+    .page {
+      grid-template-columns: 1fr 400px;
+      align-items: start;
     }
   }
-  .trust {
+  /* The left column owns the spacing between its child components. */
+  .info {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    margin: 1rem 0 0;
-    font-size: var(--text-xs);
-    color: var(--color-ink-500);
+    flex-direction: column;
+    gap: 1.5rem;
   }
-  .footnote {
-    margin: 0;
-    font-size: var(--text-xs);
-    color: var(--color-ink-400);
-    text-align: center;
+  /* Cap on a single column so the card doesn't stretch wider than the content
+     beside it; on desktop the 400px grid column wins. Owns spacing between the
+     card and the source link below it. */
+  .checkout {
+    width: 100%;
+    max-width: 30rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
   }
-  .ulink {
-    color: var(--color-ink-700);
+  .readmore {
+    align-self: center;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-accent-strong);
+    text-decoration: none;
+  }
+  .readmore:hover {
     text-decoration: underline;
     text-underline-offset: 2px;
-  }
-  .ulink:hover {
-    color: var(--color-accent);
   }
 </style>

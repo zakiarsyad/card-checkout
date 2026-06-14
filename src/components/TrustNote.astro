@@ -1,0 +1,51 @@
+---
+// Static reassurance shown under the pay button.
+---
+
+<p class="trust">
+  <span class="trust__text">
+    <span class="trust__line">
+      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg> Secured by Stripe</span>
+    <span class="trust__sub">test mode — your card is never charged</span>
+  </span>
+</p>
+
+<style>
+  .trust {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1.25rem 0 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-ink-100);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    color: var(--color-ink-500);
+  }
+  .trust__text {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+  }
+  /* Lock + label on one centered row (Tailwind preflight makes <svg> block,
+     so we lay it out explicitly instead of relying on inline flow). */
+  .trust__line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    color: var(--color-ink-700);
+    font-weight: 500;
+  }
+  .trust__line svg {
+    flex-shrink: 0;
+  }
+  .trust__sub {
+    color: var(--color-ink-500);
+  }
+</style>
