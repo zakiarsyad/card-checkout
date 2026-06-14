@@ -49,6 +49,19 @@ export function mapStripeError(err: StripeLikeError | null | undefined): UserErr
   const code = err?.code ?? "";
   const declineCode = err?.decline_code ?? "";
 
+  // 3-D Secure failed or was canceled. Checked before the type buckets because
+  // Stripe sends this as an `invalid_request_error`, which would otherwise be
+  // mistaken for our own misconfiguration.
+  if (code === "payment_intent_authentication_failure") {
+    return {
+      kind: "authentication_required",
+      title: "Authentication failed",
+      message:
+        "Your bank couldn't verify this payment, or it was canceled. No charge was made — try again, or use a different card.",
+      retryable: true,
+    };
+  }
+
   // Card declined — the most common real-world case.
   if (code === "card_declined" || type === "card_error") {
     if (code === "expired_card" || code === "incorrect_cvc" || code === "incorrect_number") {

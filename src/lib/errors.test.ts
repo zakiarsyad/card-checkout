@@ -25,6 +25,15 @@ describe("mapStripeError", () => {
     expect(e.kind).toBe("authentication_required");
   });
 
+  it("treats canceled/failed 3-D Secure as an auth failure, not a config error", () => {
+    // Stripe sends this with type invalid_request_error — must NOT become "config".
+    const e = mapStripeError({ type: "invalid_request_error", code: "payment_intent_authentication_failure" });
+    expect(e.kind).toBe("authentication_required");
+    expect(e.kind).not.toBe("config");
+    expect(e.title).toMatch(/authentication failed/i);
+    expect(e.retryable).toBe(true);
+  });
+
   it("maps validation errors", () => {
     expect(mapStripeError({ type: "validation_error" }).kind).toBe("incorrect_details");
   });

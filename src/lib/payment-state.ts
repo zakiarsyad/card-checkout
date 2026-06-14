@@ -44,11 +44,6 @@ export function statusToUiState(status: PaymentIntentStatus): UiState {
   }
 }
 
-/** Terminal UI states need no further action from us. */
-export function isTerminal(state: UiState): boolean {
-  return state === "succeeded" || state === "failed";
-}
-
 /** Human-facing copy per UI state. Active voice; says what's happening. */
 export const STATE_COPY: Record<UiState, { title: string; message: string }> = {
   idle: { title: "", message: "" },

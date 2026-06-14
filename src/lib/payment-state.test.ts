@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { statusToUiState, isTerminal, type PaymentIntentStatus } from "./payment-state";
+import { statusToUiState, type PaymentIntentStatus } from "./payment-state";
 
 describe("statusToUiState", () => {
   const cases: [PaymentIntentStatus, string][] = [
@@ -27,18 +27,5 @@ describe("statusToUiState", () => {
       "succeeded",
     ];
     for (const s of all) expect(statusToUiState(s)).toBeTruthy();
-  });
-});
-
-describe("isTerminal", () => {
-  it("treats succeeded and failed as terminal", () => {
-    expect(isTerminal("succeeded")).toBe(true);
-    expect(isTerminal("failed")).toBe(true);
-  });
-  it("treats in-flight states as non-terminal", () => {
-    expect(isTerminal("processing")).toBe(false);
-    expect(isTerminal("requires_action")).toBe(false);
-    expect(isTerminal("submitting")).toBe(false);
-    expect(isTerminal("idle")).toBe(false);
   });
 });
