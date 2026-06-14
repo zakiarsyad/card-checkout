@@ -41,7 +41,11 @@ export default async function handler(req: Request, _context: Context): Promise<
       customer: customer.id,
       items: [{ price: priceId }],
       payment_behavior: "default_incomplete",
-      payment_settings: { save_default_payment_method: "on_subscription" },
+      // Card only — keep the demo's payment step unambiguous (no wallets/Link).
+      payment_settings: {
+        save_default_payment_method: "on_subscription",
+        payment_method_types: ["card"],
+      },
       billing_mode: { type: "flexible" },
       expand: ["latest_invoice.confirmation_secret"],
       metadata: { plan: plan.key, product: "pro_ui_kit", cid },

@@ -27,7 +27,8 @@ export default async function handler(req: Request, _context: Context): Promise<
       {
         amount: plan.amount,
         currency: plan.currency,
-        automatic_payment_methods: { enabled: true },
+        // Card only — keep the demo's payment step unambiguous (no wallets/Link).
+        payment_method_types: ["card"],
         metadata: { plan: plan.key, product: "pro_ui_kit", cid },
       },
       { idempotencyKey },
