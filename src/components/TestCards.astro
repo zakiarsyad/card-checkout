@@ -2,8 +2,8 @@
 // The "how to run the demo" aside — click-to-copy test cards. Secondary to the
 // pitch above it, so it's set in a muted panel.
 const testCards = [
-  { label: "Succeeds", number: "4242424242424242" },
-  { label: "3-D Secure", number: "4000002500003155" },
+  { label: "Success", number: "4242424242424242" },
+  { label: "3D Secure", number: "4000002500003155" },
   { label: "Declined", number: "4000000000000002" },
 ];
 const spaced = (n: string) => n.replace(/(.{4})/g, "$1 ").trim();
@@ -22,9 +22,9 @@ const spaced = (n: string) => n.replace(/(.{4})/g, "$1 ").trim();
     }
   </div>
   <p class="try__why">
-    Any future expiry &amp; CVC. Can't autofill it for you — the card field is a
-    sandboxed Stripe iframe, off-limits to page JS (the PCI boundary that keeps
-    card data off our servers).
+    Any future expiry &amp; CVC.
+    Can't autofill it for you — the card field is a
+    Stripe iframe, isolated from our page (and our servers).
   </p>
 </div>
 

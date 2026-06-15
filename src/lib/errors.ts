@@ -87,7 +87,7 @@ export function mapStripeError(err: StripeLikeError | null | undefined): UserErr
       title: "Your card was declined",
       message:
         DECLINE_MESSAGES[declineCode] ??
-        "Your bank declined the charge. Try a different card, or contact your bank.",
+        "Your bank declined it. Try a different card, or contact your bank.",
       retryable: true,
     };
   }

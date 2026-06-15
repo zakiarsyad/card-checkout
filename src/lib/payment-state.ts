@@ -54,8 +54,8 @@ export const STATE_COPY: Record<UiState, { title: string; message: string }> = {
   },
   processing: {
     title: "Payment processing",
-    message: "Your payment is going through. We'll confirm by email once it settles.",
+    message: "Your payment is going through and will be confirmed once it settles.",
   },
-  succeeded: { title: "Payment complete", message: "Thank you — your purchase is confirmed." },
+  succeeded: { title: "Payment successful", message: "Thanks — your payment went through." },
   failed: { title: "Payment didn't go through", message: "No charge was made. You can try again." },
 };

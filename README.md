@@ -27,6 +27,8 @@ server-authoritative pricing, and complete payment-state handling.
   [`ADR-0006`](docs/decisions/ADR-0006-visual-design-language.md)
 - **Card-only, on purpose.** A focused demo; display is driven by the account's payment-method
   configuration, not the intent. → [`ADR-0007`](docs/decisions/ADR-0007-card-only-payment-methods.md)
+- **The webhook is observable.** The success page shows a live indicator that confirms when Stripe's
+  webhook for the payment reached the server. → [`ADR-0008`](docs/decisions/ADR-0008-webhook-received-indicator.md)
 
 **New to the code?** Start with [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — a 5-minute
 code map: the request lifecycle traced through the actual files, a directory guide, and a

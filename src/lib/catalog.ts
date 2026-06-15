@@ -60,6 +60,11 @@ export function isPlanKey(value: unknown): value is PlanKey {
   return typeof value === "string" && (PLAN_KEYS as readonly string[]).includes(value);
 }
 
+/** Short price suffix for a billing interval ("/yr", "/mo"). */
+export function intervalSuffix(interval?: string): string {
+  return interval === "year" ? "/yr" : "/mo";
+}
+
 /**
  * Resolve a plan from an untrusted client-supplied key.
  * Throws on an unknown key — the client cannot smuggle in a custom plan.

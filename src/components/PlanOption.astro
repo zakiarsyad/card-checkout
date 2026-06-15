@@ -1,5 +1,5 @@
 ---
-import type { Plan } from "../lib/catalog";
+import { intervalSuffix, type Plan } from "../lib/catalog";
 import { formatAmount } from "../lib/money";
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
 }
 
 const { plan, checked = false } = Astro.props;
-const per = plan.interval === "year" ? "/yr" : "/mo";
+const per = intervalSuffix(plan.interval);
 ---
 
 <label class="plan">

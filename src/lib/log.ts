@@ -33,7 +33,6 @@ export type Level = "debug" | "info" | "warn" | "error";
 
 export interface Logger {
   child(fields: Record<string, unknown>): Logger;
-  log(level: Level, msg: string, fields?: Record<string, unknown>): void;
   debug(msg: string, fields?: Record<string, unknown>): void;
   info(msg: string, fields?: Record<string, unknown>): void;
   warn(msg: string, fields?: Record<string, unknown>): void;
@@ -47,7 +46,6 @@ export function createLogger(base: Record<string, unknown> = {}): Logger {
   };
   return {
     child: (fields) => createLogger({ ...base, ...fields }),
-    log: emit,
     debug: (m, f) => emit("debug", m, f),
     info: (m, f) => emit("info", m, f),
     warn: (m, f) => emit("warn", m, f),

@@ -10,7 +10,7 @@
 import { mapStripeError } from "../lib/errors";
 import { STATE_COPY } from "../lib/payment-state";
 import { formatAmount } from "../lib/money";
-import { PLANS, type PlanKey } from "../lib/catalog";
+import { PLANS, intervalSuffix, type PlanKey } from "../lib/catalog";
 import type { Stripe, StripeElements, StripePaymentElement } from "@stripe/stripe-js";
 
 type Phase = "select" | "pay";
@@ -68,14 +68,12 @@ export function initCheckout(): void {
     errorEl.textContent = "";
   };
 
-  const perSuffix = (interval?: string) => (interval === "year" ? "/yr" : "/mo");
-
   // The CTA must say exactly what it does — and never let a subscription read
   // like a one-time charge (docs/STANDARDS.md → Design; ADR-0006).
   const payLabel = (): string => {
     const plan = PLANS[selectedPlan()];
     const amount = formatAmount(plan.amount, plan.currency);
-    return plan.interval ? `Subscribe · ${amount}${perSuffix(plan.interval)}` : `Pay ${amount}`;
+    return plan.interval ? `Subscribe · ${amount}${intervalSuffix(plan.interval)}` : `Pay ${amount}`;
   };
 
   // Keep the live total + recurring note in sync with the toggle. The total is

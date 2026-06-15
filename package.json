@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",
-    "@fontsource/fraunces": "^5.2.9",
+    "@netlify/blobs": "^10.7.9",
     "@stripe/stripe-js": "^9.8.0",
     "astro": "^6.4.6",
     "stripe": "^22.2.1"

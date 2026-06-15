@@ -70,22 +70,24 @@ src/
   pages/                ← thin composition (Astro)
     index.astro           lays out the two columns from the components above
     success.astro         post-payment status page (reads, never fulfills); shows the
-                          recurring summary for subscriptions (next-charge date via the URL)
+                          recurring summary + a live "webhook received" indicator
   scripts/              ← browser controllers (vanilla TS, no framework)
     checkout.ts           the payment island: loads Stripe.js, confirms payment
     test-cards.ts         click-to-copy for the test-card chips
-    success.ts            reads PaymentIntent status for display
+    success.ts            reads status; polls webhook-status for the indicator
   layouts/Layout.astro   <head>, fonts, preconnect, SEO meta + JSON-LD
   styles/global.css      design tokens (Tailwind v4 @theme) + base styles
 
 netlify/functions/      ← serverless endpoints (thin shells over src/lib)
   create-payment-intent.ts   one-time
   create-subscription.ts     recurring
-  stripe-webhook.ts          verifies signature, routes events, "fulfills"
+  stripe-webhook.ts          verifies signature, routes events, "fulfills", marks receipt
+  webhook-status.ts          has this payment's webhook arrived? (success-page indicator)
   _shared/
     checkout.ts              shared request parsing/validation for both creates
     stripe.ts                Stripe client factory (rejects live keys)
     http.ts                  json()/errorResponse()/readJson() helpers
+    webhook-store.ts         Netlify Blobs receipt marker (keyed by PaymentIntent id)
 
 docs/                   ← read these to understand the "why" (start with README.md)
 ```

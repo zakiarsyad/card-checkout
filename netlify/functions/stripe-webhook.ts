@@ -4,6 +4,7 @@ import { json, errorResponse, methodNotAllowed } from "./_shared/http";
 import { createLogger } from "../../src/lib/log";
 import { isHandledEvent, decideFulfillment } from "../../src/lib/webhook-events";
 import { createMemoryStore, processOnce } from "../../src/lib/idempotency";
+import { markPaymentSeen } from "./_shared/webhook-store";
 
 // Module scope: survives across warm invocations of this instance. A durable
 // store (Redis/Postgres) would replace this in production — see README.
@@ -48,8 +49,25 @@ export default async function handler(req: Request, _context: Context): Promise<
   }
 
   try {
-    const result = await processOnce(idempotency, event.id, () => {
-      const action = decideFulfillment(event as unknown as { type: string; data: { object: Record<string, unknown> } });
+    const evt = event as unknown as {
+      id: string;
+      type: string;
+      created: number;
+      data: { object: Record<string, unknown> };
+    };
+    const result = await processOnce(idempotency, event.id, async () => {
+      // Mark the payment's webhook as received so the success page can confirm
+      // it (fires for both one-time and a subscription's first charge). Best-
+      // effort — a store hiccup must never fail the webhook (→ Stripe retries).
+      if (evt.type === "payment_intent.succeeded" && typeof evt.data.object.id === "string") {
+        try {
+          await markPaymentSeen(evt.data.object.id, evt.created);
+        } catch (e) {
+          elog.warn("receipt marker failed", { message: e instanceof Error ? e.message : String(e) });
+        }
+      }
+
+      const action = decideFulfillment(evt);
       if (!action) return;
       // "Fulfillment" — in this demo we log the audit line; a real system would
       // grant/revoke entitlements, write a ledger row, and send a receipt.
