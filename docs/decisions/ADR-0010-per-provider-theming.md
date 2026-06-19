@@ -21,7 +21,7 @@ so the components never need to change.
   ```css
   [data-provider="adyen"]  { --color-accent: #0abf53; /* … */ }
   ```
-  Defaults in the `@theme` block remain Stripe's, so Stripe needs no override.
+  Defaults in the `:root` token block remain Stripe's, so Stripe needs no override.
 - Token overrides are added **with each provider's page**, not up front — no
   unused rules for providers that don't exist yet.
 

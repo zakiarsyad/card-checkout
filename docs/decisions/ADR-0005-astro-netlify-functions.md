@@ -12,8 +12,8 @@ reusing rather than introducing new infrastructure.
 
 ## Decision
 
-Use **Astro (SSR)** for the frontend and **Netlify Functions** for the server endpoints
-(`create-payment-intent`, `create-subscription`) and the Stripe webhook.
+Use **Astro (static output)** for the frontend and **Netlify Functions** for the server endpoints
+(`stripe-create-payment-intent`, `stripe-create-subscription`, and the Xendit equivalents) and the webhooks.
 
 ## Options considered
 

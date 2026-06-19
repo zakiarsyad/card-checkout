@@ -8,7 +8,8 @@
  *   create session → new XenditComponents({ componentsSdkKey })
  *   → on "init": mount the CARDS channel component
  *   → "submission-ready" enables the button → submit()
- *   → "action-begin"/"action-end" host the 3-D Secure challenge in a modal
+ *   → 3-D Secure renders in the SDK's own default action-container overlay
+ *     (we don't handle "action-begin", so Xendit creates+manages the modal)
  *   → "session-complete" → /xendit/success  (one-time / PAY only)
  *
  * SUBSCRIPTION sessions complete server-side but the SDK (v0.0.24) doesn't emit
@@ -31,11 +32,9 @@ export function initCheckout(): void {
   const recurringEl = document.getElementById("recurring-note");
   const paymentSection = document.getElementById("payment-section");
   const mountEl = document.getElementById("payment-mount");
-  const actionEl = document.getElementById("action");
-  const actionModal = document.getElementById("action-modal");
   const statusEl = document.getElementById("status");
   const errorEl = document.getElementById("error");
-  if (!form || !primary || !totalEl || !paymentSection || !mountEl || !actionEl || !statusEl || !errorEl) return;
+  if (!form || !primary || !totalEl || !paymentSection || !mountEl || !statusEl || !errorEl) return;
 
   let phase: Phase = "select";
   let components: import("xendit-components-web").XenditComponents | null = null;
@@ -108,7 +107,6 @@ export function initCheckout(): void {
     sessionId = "";
     idempotencyKey = "";
     mountEl.replaceChildren();
-    if (actionModal) actionModal.hidden = true;
     paymentSection!.hidden = true;
     clearStatus();
     clearError();
@@ -160,22 +158,12 @@ export function initCheckout(): void {
       });
       sdk.addEventListener("submission-ready", () => setButton(payLabel(), { disabled: false }));
 
-      // 3-D Secure: host the challenge in the modal overlay.
-      sdk.addEventListener("action-begin", () => {
-        // Reveal the modal BEFORE mounting, so the challenge iframe renders into
-        // a visible, sized container (mounting it hidden gives a zero-size frame).
-        if (actionModal) actionModal.hidden = false;
-        actionEl!.replaceChildren(sdk.createActionContainerComponent());
-      });
-      sdk.addEventListener("action-end", () => {
-        if (actionModal) actionModal.hidden = true;
-        actionEl!.replaceChildren();
-      });
-      // Fires for one-time (PAY); SUBSCRIPTION reaches success via pollForCompletion.
+      // 3-D Secure: we don't handle "action-begin", so the SDK renders the
+      // challenge in its own default action-container overlay (shown/hidden by
+      // the SDK). Fires for one-time (PAY); SUBSCRIPTION reaches success via pollForCompletion.
       sdk.addEventListener("session-complete", goToSuccess);
       sdk.addEventListener("session-expired-or-canceled", () => {
         window.clearInterval(successPoll);
-        if (actionModal) actionModal.hidden = true;
         clearStatus();
         showError("Payment didn't go through", "No charge was made. You can try again.");
         setButton(payLabel(), { disabled: false });
@@ -186,7 +174,6 @@ export function initCheckout(): void {
       sdk.addEventListener("submission-end", (e) => {
         if (!e.userErrorMessage && !e.developerErrorMessage) return; // success path
         window.clearInterval(successPoll);
-        if (actionModal) actionModal.hidden = true;
         clearStatus();
         const msg = e.userErrorMessage ?? [];
         showError(msg[0] ?? "Payment didn't go through", msg.slice(1).join(" ") || "No charge was made. You can try again.");
@@ -196,7 +183,6 @@ export function initCheckout(): void {
       // "Continue" does that). Matches Xendit's reference integration.
       sdk.addEventListener("fatal-error", () => {
         window.clearInterval(successPoll);
-        if (actionModal) actionModal.hidden = true;
         clearStatus();
         showError("Something went wrong", "Please reload and try again.");
         setButton("Continue to payment", { disabled: false });

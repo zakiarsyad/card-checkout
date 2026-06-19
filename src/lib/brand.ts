@@ -9,8 +9,10 @@ export const BRAND = {
   url: "https://checkout.zakiarsyad.com",
   /** Source repository. */
   repo: "https://github.com/zakiarsyad/card-checkout",
-  /** Author — used for SEO structured data / attribution (not shown in the UI). */
+  /** Author — used for SEO structured data + the on-page attribution link. */
   author: "Zaki Arsyad",
+  /** Author's site — where the attribution byline links. */
+  authorUrl: "https://zakiarsyad.com",
   description:
     "A minimal, production-minded Stripe checkout. One product, sold two ways (one-time or subscription), with the Payment Element, webhook-driven fulfillment, and a complete payment state machine.",
 } as const;

@@ -119,7 +119,7 @@ docs/                   ← read these to understand the "why" (start with READM
 | Change the left-column pitch / test cards | `src/components/stripe/DemoIntro.astro` / `TestCards.astro` |
 | Change the page layout (two columns) | `src/pages/stripe/index.astro` |
 | Change the confirm/3DS flow | `src/scripts/stripe/checkout.ts` |
-| Change colors / type / spacing | `@theme` block in `src/styles/global.css` |
+| Change colors / type / spacing | `:root` token block in `src/styles/global.css` |
 
 ## Conventions a new dev should know
 
@@ -134,7 +134,7 @@ docs/                   ← read these to understand the "why" (start with READM
   to pay. (An earlier sketch imagined a React `CheckoutForm.tsx`; we went vanilla
   to meet the performance budget in [`STANDARDS.md`](STANDARDS.md).)
 - **Stripe-aligned design.** One variable sans (Inter) everywhere; Stripe's
-  navy/slate palette with the `#635BFF` blurple. Tokens are the `@theme` block in
+  navy/slate palette with the `#635BFF` blurple. Tokens are the `:root` custom properties in
   `src/styles/global.css`; rationale in
   [`decisions/ADR-0006`](decisions/ADR-0006-visual-design-language.md). The CTA
   copy is plan-aware so a subscription never reads as a one-time charge.

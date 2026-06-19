@@ -1,0 +1,30 @@
+---
+// Shared attribution byline shown under the checkout card on every provider
+// page — same on Stripe and Xendit so they don't drift. Two links: the author's
+// name → their site, and the source → the repo docs.
+import { BRAND } from "../lib/brand";
+---
+
+<p class="byline">
+  Built by <a href={BRAND.authorUrl} rel="noopener">{BRAND.author}</a>
+  · <a href={`${BRAND.repo}/tree/main/docs`} rel="noopener">Source &amp; architecture →</a>
+</p>
+
+<style>
+  .byline {
+    align-self: center;
+    margin: 0;
+    text-align: center;
+    font-size: var(--text-xs);
+    color: var(--color-ink-500);
+  }
+  .byline a {
+    font-weight: 600;
+    color: var(--color-accent-strong);
+    text-decoration: none;
+  }
+  .byline a:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+</style>

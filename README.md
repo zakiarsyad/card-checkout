@@ -6,7 +6,9 @@ A set of checkout demos — the **same** product (sold **one-time** or by **subs
 once per payment provider, each under its own subpath and in its own brand, on a shared
 Astro + Netlify Functions shell.
 
-- **`/stripe`** — built, on Stripe's Payment Element. *(Adyen and Xendit are planned.)*
+- **`/stripe`** — on Stripe's Payment Element. **`/xendit`** — on Xendit's Components SDK. Both are
+  built (one-time + subscription each), each in its own brand. *(Adyen is planned.)* The root
+  `/` redirects to `/stripe`.
 
 Built as a portfolio piece. The goal isn't feature breadth; it's the judgment that separates a
 real payments integration from a tutorial: webhook-driven fulfillment, idempotency,
@@ -30,8 +32,8 @@ server-authoritative pricing, and complete payment-state handling.
   [`ADR-0006`](docs/decisions/ADR-0006-visual-design-language.md)
 - **Card-only, on purpose.** A focused demo; display is driven by the account's payment-method
   configuration, not the intent. → [`ADR-0007`](docs/decisions/ADR-0007-card-only-payment-methods.md)
-- **The webhook is observable.** The success page shows a live indicator that confirms when Stripe's
-  webhook for the payment reached the server. → [`ADR-0008`](docs/decisions/ADR-0008-webhook-received-indicator.md)
+- **The webhook is observable.** The success page shows a live indicator that confirms when the
+  provider's webhook for the payment reached the server. → [`ADR-0008`](docs/decisions/ADR-0008-webhook-received-indicator.md)
 - **One app, per-provider subpaths.** A shared design system + domain core; each provider is its own
   implementation, not a leaky shared abstraction. → [`ADR-0009`](docs/decisions/ADR-0009-multi-provider-structure.md)
 - **Per-provider theming via tokens.** Same components, brand swapped through CSS custom properties. →
@@ -49,21 +51,21 @@ payments depth — is written down in [`docs/STANDARDS.md`](docs/STANDARDS.md). 
 
 Astro · TypeScript · plain CSS (hand-authored design tokens, no framework) · Netlify Functions · Stripe (Payment Element) + Xendit (Components SDK), both with the Node SDK
 
-## Architecture (the Stripe flow)
+## Architecture (the Stripe flow; Xendit mirrors it)
 
 ```
             choose plan
  [  /stripe  ] ──────────────┐
                               ▼
-        one-time ──► /create-payment-intent ──┐
-                                              ├──► client_secret
-        subscribe ─► /create-subscription ────┘        │
-                                                        ▼
-                                          [Payment Element confirm]
-                                                        │
-                                              3DS challenge if required
-                                                        │
-                                                        ▼
+        one-time ──► /stripe-create-payment-intent ──┐
+                                                      ├──► client_secret
+        subscribe ─► /stripe-create-subscription ────┘        │
+                                                              ▼
+                                              [Payment Element confirm]
+                                                              │
+                                                  3DS challenge if required
+                                                              │
+                                                              ▼
                               Stripe ──► /stripe-webhook ──► fulfillment
                               (payment_intent.succeeded / invoice.paid)
 ```
@@ -71,12 +73,18 @@ Astro · TypeScript · plain CSS (hand-authored design tokens, no framework) · 
 The client always does the same thing — confirm a PaymentIntent. The two server endpoints just
 create that intent differently.
 
+`/xendit` runs the same shape on Xendit's Components SDK: `/xendit-create-session` returns a
+session the client confirms in-page (one-time or subscription), 3-D Secure renders in a modal,
+and fulfillment is the same webhook-driven path (`/xendit-webhook` → `/xendit-webhook-status` for
+the live indicator). Per-provider code is namespaced (`*/stripe`, `*/xendit`); the card UI,
+domain core, and design tokens are shared.
+
 ## Getting started
 
-Prerequisites: Node 20+, a Stripe account (test mode), the Stripe CLI.
+Prerequisites: Node 20+, Stripe + Xendit test accounts, and the Stripe CLI (for local webhook forwarding).
 
 1. `npm install`
-2. `cp .env.example .env` and fill in your test keys + Price IDs (Stripe; Xendit keys for `/xendit`)
+2. `cp .env.example .env` and fill in your test keys + Price IDs (Stripe and Xendit)
 3. `npm run dev` — serves **HTTPS** at `https://localhost:8888` (a self-signed cert is
    auto-generated into `.cert/`; accept the browser warning once). Dev is HTTPS on purpose:
    **Xendit Components requires an HTTPS origin even in test mode**, so the Xendit checkout
@@ -93,12 +101,13 @@ Prerequisites: Node 20+, a Stripe account (test mode), the Stripe CLI.
 | Requires 3DS | `4000 0025 0000 3155` |
 | Declined | `4000 0000 0000 0002` |
 
-Any future expiry, any CVC, any ZIP.
+Any future expiry, any CVC, any ZIP. (`/xendit` instead has a built-in **Simulate scenario**
+picker — frictionless success, 3-D Secure challenge, or failure — so there's nothing to type.)
 
 ## Production notes (deliberately out of scope)
 
 This is a focused demo, not a production system. In a real deployment I'd add: a persistence
-layer with a ledger and reconciliation against Stripe, dunning on failed subscription renewals,
+layer with a ledger and reconciliation against the provider, dunning on failed subscription renewals,
 an audit trail for every payment-lifecycle event, alerting on webhook failures and anomalies,
 and a formal review of PCI SAQ-A scope. They're named here on purpose — knowing where the line
 is matters as much as the code on this side of it.

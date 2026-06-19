@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import { BRAND } from "../../lib/brand";
 import DemoIntro from "../../components/xendit/DemoIntro.astro";
 import CheckoutShell from "../../components/CheckoutShell.astro";
+import SourceLink from "../../components/SourceLink.astro";
 ---
 
 <Layout provider="xendit" title={`${BRAND.name} — a Xendit checkout demo`}>
@@ -15,7 +16,7 @@ import CheckoutShell from "../../components/CheckoutShell.astro";
     <!-- Right: the live checkout -->
     <section class="checkout" aria-label="Checkout">
       <CheckoutShell provider="xendit" locale="id-ID" />
-      <a class="readmore" href="/">← All demos</a>
+      <SourceLink />
     </section>
   </main>
 
@@ -28,7 +29,7 @@ import CheckoutShell from "../../components/CheckoutShell.astro";
 <style>
   .page {
     min-height: 100dvh;
-    max-width: 900px;
+    max-width: 34rem; /* single column: a centered column sized to the card (≥860px widens to two columns below) */
     margin-inline: auto;
     padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2rem);
     display: grid;
@@ -36,31 +37,23 @@ import CheckoutShell from "../../components/CheckoutShell.astro";
   }
   @media (min-width: 860px) {
     .page {
+      max-width: 900px;
       grid-template-columns: 1fr 400px;
       align-items: start;
     }
   }
   .info {
+    min-width: 0; /* let the grid column shrink to the viewport on small screens */
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
   }
   .checkout {
+    min-width: 0; /* ditto — without this the card's content can force h-overflow < ~330px */
     width: 100%;
     max-width: 30rem;
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
-  }
-  .readmore {
-    align-self: center;
-    font-size: var(--text-xs);
-    font-weight: 600;
-    color: var(--color-accent-strong);
-    text-decoration: none;
-  }
-  .readmore:hover {
-    text-decoration: underline;
-    text-underline-offset: 2px;
   }
 </style>

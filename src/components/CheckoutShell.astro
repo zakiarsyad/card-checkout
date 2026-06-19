@@ -1,8 +1,8 @@
 ---
 // Shared checkout card — one component for every provider. The only things that
 // differ are resolved from `provider`: the prices (catalog), the locale, the
-// brand name (TrustNote + lede). The provider's island mounts into #payment-mount
-// and (if it does 3-D Secure) into #action; the page wires which island runs.
+// brand name (TrustNote + lede). The provider's island mounts into #payment-mount;
+// 3-D Secure is handled by each SDK's own overlay. The page wires which island runs.
 import { PLANS, PRODUCT_NAME, priceFor, type Provider } from "../lib/catalog";
 import { formatAmount } from "../lib/money";
 import PlanOption from "./PlanOption.astro";
@@ -52,15 +52,6 @@ const fmt = (p: { amount: number; currency: string }) => formatAmount(p.amount, 
   <button id="primary" class="btn" type="button">Continue to payment</button>
 
   <TrustNote name={name} />
-
-  <!-- Inline 3-D Secure: providers that need a challenge mount it here (a centered
-       overlay, not inline below the form). Providers that don't simply never show it. -->
-  <div class="action-modal" id="action-modal" hidden>
-    <div class="action-modal__panel">
-      <p class="action-modal__title">Verify your payment</p>
-      <div id="action"></div>
-    </div>
-  </div>
 </section>
 
 <style>
@@ -195,55 +186,5 @@ const fmt = (p: { amount: number; currency: string }) => formatAmount(p.amount, 
     to {
       transform: rotate(360deg);
     }
-  }
-  /* 3-D Secure: a centered card over a dimmed page (like Stripe's challenge) —
-     the page stays visible behind a scrim, the OTP sits in a modal panel. */
-  .action-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: grid;
-    place-items: center;
-    padding: 1rem;
-    background: rgb(10 37 64 / 0.55);
-  }
-  .action-modal[hidden] {
-    display: none;
-  }
-  .action-modal__panel {
-    background: var(--color-paper);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem;
-    width: 100%;
-    max-width: 560px;
-    max-height: 92vh;
-    overflow: auto;
-    box-shadow: 0 20px 60px -15px rgb(10 37 64 / 0.4);
-  }
-  .action-modal__title {
-    margin: 0 0 0.75rem;
-    font-weight: 600;
-    font-size: var(--text-sm);
-    color: var(--color-ink-900);
-  }
-  .action-modal #action {
-    width: 100%;
-  }
-  /* Xendit injects <xendit-action-container><iframe>. The iframe carries no
-     height of its own, so it falls back to the HTML default of 150px and clips
-     the bank's challenge. Give the container + iframe a tall, fixed height that
-     fits the OTP screen (the panel scrolls if a challenge is ever taller). */
-  .action-modal #action :global(xendit-action-container) {
-    display: block;
-    width: 100%;
-    /* Sized to Xendit's 3-D Secure challenge window (~520×500) so it renders
-       as-is — no clipping, no oversized empty box. The bank's page scrolls
-       within this window if it's taller. */
-    height: 500px;
-  }
-  .action-modal #action :global(iframe) {
-    width: 100%;
-    height: 100%;
-    border: 0;
   }
 </style>

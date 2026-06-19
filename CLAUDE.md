@@ -114,6 +114,8 @@ first payment, and how to surface that PaymentIntent's client secret.
 - `STRIPE_SECRET_KEY` — test secret key (`sk_test_…`), server-side
 - `STRIPE_WEBHOOK_SECRET` — from `stripe listen` locally / dashboard in prod
 - `PRICE_ONE_TIME`, `PRICE_SUBSCRIPTION` — Stripe test Price IDs
+- `XENDIT_SECRET_KEY` — Xendit test secret key (`xnd_development_…`), server-side
+- `XENDIT_CALLBACK_TOKEN` — Xendit's static webhook verification token (`x-callback-token`)
 
 ## How to work this project
 

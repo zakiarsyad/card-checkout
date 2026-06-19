@@ -49,14 +49,20 @@ const jsonLd = {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGZM4HZJQ5" is:inline></script>
+    <!-- Google tag (gtag.js) — loaded after the window load event so the 150KB+
+         script never competes with the critical render path; the pageview queues
+         in dataLayer and flushes once gtag.js arrives. -->
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-TGZM4HZJQ5');
+      function gtag() { dataLayer.push(arguments); }
+      gtag("js", new Date());
+      gtag("config", "G-TGZM4HZJQ5");
+      addEventListener("load", function () {
+        var s = document.createElement("script");
+        s.async = true;
+        s.src = "https://www.googletagmanager.com/gtag/js?id=G-TGZM4HZJQ5";
+        document.head.appendChild(s);
+      });
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
